@@ -83,6 +83,7 @@ func (app *App) hashHandler(w http.ResponseWriter, r *http.Request) {
 	case r.Method == "POST":
 		hashedPassword, err := utils.HashPassword([]byte(password))
 		if err != nil {
+			logger.Error.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -109,6 +110,7 @@ func (app *App) shutdownHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Gracefully shutting down server...")
 		app.Shutdown <- true
 	default:
+		logger.Error.Println("Invalid HTTP Method")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 	}
 }
@@ -128,12 +130,14 @@ func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
 
 		jsonBody, err := json.Marshal(statistics)
 		if err != nil {
+			logger.Error.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonBody)
 	default:
+		logger.Error.Println("Invalid HTTP Method")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 	}
 }
