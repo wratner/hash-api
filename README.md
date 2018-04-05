@@ -21,10 +21,17 @@ This project allows a user to hash and encode a password over http. It also allo
   * The 'stats' endpoint returns a JSON response in format ```{"total":0,"average":0}```
    * total is the total number of requests made to the `/hash` endpoint during the life of the server.
    * average is the time it has taken to process all of those requests to the `/hash` endpoint in milliseconds.
-     * This includes the 5 second delayed response. Because of this, nearly all responses are ~5001-5003 milliseconds. 
+     * This includes the 5 second delayed response. Because of this, nearly all responses are ~5001-5003 milliseconds.
+   * cURL example:
+     * `curl http://localhost:8080/stats`
 * `/shutdown`
   * GET
   * The 'shutdown' endpoint will gracefully shutdown the server. All remaining requests are allowed to complete and no additional requests will be allowed to be processed. The server will stop as soon as any existing work is completed.
+  * cURL example:
+    * `curl http://localhost:8080/shutdown`
+  
+# Run Instructions
+Once you have the code downloaded locally, simply run ```go build``` inside the root directory. From there you can run ```./hash-api -port=<whatever-port-you-want>``` (default is 8080) and begin hitting the server with requests.
   
 ## DISCLAIMER
 
