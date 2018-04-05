@@ -12,13 +12,15 @@ import (
 	"github.com/wratner/hash-api/utils"
 )
 
-// Statistics ...
+// Statistics is the return format for the /stats endpoint.
 type Statistics struct {
 	Total   int     `json:"total"`
 	Average float64 `json:"average"`
 }
 
-// App ...
+// App is the class that holds the total number of requests,
+// the total response time of all the requests, and the shutdown
+// channel that is used to gracefully shutdown the server.
 type App struct {
 	Total        int
 	ResponseTime float64
@@ -59,6 +61,10 @@ func main() {
 
 }
 
+// hashHandler reads the field value "password" and performs a
+// SHA512 hash and then it is base64 encoded. It returns the response
+// to the client after 5 seconds. It also increments the total request number
+// everytime it is called as well as adds to the total response time.
 func (app *App) hashHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	timer := time.NewTimer(time.Second * 5)
@@ -75,7 +81,11 @@ func (app *App) hashHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	switch {
 	case r.Method == "POST":
-		hashedPassword := utils.HashPassword([]byte(password))
+		hashedPassword, err := utils.HashPassword([]byte(password))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		encodedHashedPassword := utils.Base64(hashedPassword)
 
 		<-timer.C
@@ -89,6 +99,10 @@ func (app *App) hashHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// shutdownHandler will only accept a GET request and sends a response back
+// to the client letting it know the server will be shut down. The shutdown
+// channel is set to true which will unblock the code in the main function
+// which will begin the graceful shutdown.
 func (app *App) shutdownHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == "GET":
@@ -99,6 +113,9 @@ func (app *App) shutdownHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// statsHandler will only accept a GET request and constructs a JSON response
+// which contains the total number of requests since the handler was called
+// as well as the average response time of all of the requests.
 func (app *App) statsHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == "GET":

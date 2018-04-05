@@ -13,6 +13,8 @@ import (
 	"github.com/wratner/hash-api/logger"
 )
 
+// TestHashHandler makes sure that the hashHandler can be called successfully,
+// and returns the expected base64 encode SHA512 hash.
 func TestHashHandler(t *testing.T) {
 	logger.Init(os.Stdout, os.Stdout)
 
@@ -45,6 +47,9 @@ func TestHashHandler(t *testing.T) {
 	}
 }
 
+// TestEmptyPasswordHashHandler ensures that when a client makes a request
+// to the /hash endpoint without a password field value set that it is handled
+// appropriately and returns the appropriate 400 response code.
 func TestEmptyPasswordHashHandler(t *testing.T) {
 	logger.Init(os.Stdout, os.Stdout)
 
@@ -61,19 +66,14 @@ func TestEmptyPasswordHashHandler(t *testing.T) {
 
 	handler.ServeHTTP(rr, req)
 
-	response, err := ioutil.ReadAll(rr.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	actualResult := strings.TrimSpace(string(response))
-	expectedResult := "Password not provided"
-
-	if actualResult != expectedResult {
-		t.Fatalf("Expected %s but got %s", expectedResult, actualResult)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("Expected %d but got %d", http.StatusBadRequest, rr.Code)
 	}
 }
 
+// TestBadShutdownHandler makes sure that if a user makes a request
+// besides GET to the /shutdown endpoint that it is handled appropriately
+// and returns a 400 response code.
 func TestBadShutdownHandler(t *testing.T) {
 	app := App{}
 
@@ -91,6 +91,8 @@ func TestBadShutdownHandler(t *testing.T) {
 	}
 }
 
+// TestEmptyStatsHandler checks that the /stats endpoint can handle
+// being called when no requests to the /hash endpoint have been made.
 func TestEmptyStatsHandler(t *testing.T) {
 	app := App{}
 	statistics := Statistics{}
@@ -122,6 +124,9 @@ func TestEmptyStatsHandler(t *testing.T) {
 	}
 }
 
+// TestStatsHandler ensures that the total number of requests and
+// average response time is calculated properly and successfully
+// returned to the client in the proper JSON format.
 func TestStatsHandler(t *testing.T) {
 	app := App{Total: 1, ResponseTime: float64(5001)}
 	statistics := Statistics{}
