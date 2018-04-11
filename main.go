@@ -96,6 +96,7 @@ func (app *App) hashHandler(w http.ResponseWriter, r *http.Request) {
 		app.Total++
 
 	default:
+		logger.Error.Println("Invalid HTTP Method")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 	}
 }
