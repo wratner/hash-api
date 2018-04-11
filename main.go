@@ -28,7 +28,7 @@ type App struct {
 }
 
 func main() {
-	logger.Init(os.Stdout, os.Stdout)
+	logger.Init(os.Stdout, os.Stderr)
 
 	app := App{Shutdown: make(chan bool)}
 
